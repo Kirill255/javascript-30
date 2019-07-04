@@ -46,12 +46,32 @@
       transform: translateY(-3px);
     }
 
+    /* стрелки */
     .hand {
       width: 50%;
       height: 6px;
-      background: black;
+      background: #000000;
       position: absolute;
       top: 50%;
+      /* default 50% - поворачивается относительно центра, а мы смещаем эту точку в позицию 100% или right */
+      /* https://developer.mozilla.org/en-US/docs/Web/CSS/transform-origin */
+      transform-origin: 100%;
+      transform: rotate(90deg);
+      transition: all 0.05s;
+      transition-timing-function: cubic-bezier(0.1, 2.7, 0.58, 1);
+    }
+
+    .hour-hand {
+      background: #0a0a0a;
+    }
+
+    .min-hand {
+      background: #151719;
+      height: 5px;
+    }
+
+    .second-hand {
+      height: 3px;
     }
   </style>
 </head>
@@ -66,7 +86,62 @@
   </div>
 
   <script>
+    const secondHand = document.querySelector(".second-hand");
+    const minHand = document.querySelector(".min-hand");
+    const hourHand = document.querySelector(".hour-hand");
 
+    const setClock = () => {
+      const date = new Date();
+      const seconds = date.getSeconds();
+      // console.log(seconds);
+      // у нас есть циферблат(круг), нам нужно перевести секунды в градусы, фул круг это 360deg
+      const secondsDegrees = ((seconds / 60) * 360) + 90; // сдесь мы добавили смещение 90deg, т.к. оно у нас задано как initial value в css
+      secondHand.style.transform = `rotate(${secondsDegrees}deg)`;
+
+      // const mins = date.getMinutes();
+      // const minsDegrees = ((mins / 60) * 360) + 90;
+      // minHand.style.transform = `rotate(${minsDegrees}deg)`;
+
+      // const hours = date.getHours();
+      // const hourDegrees = ((hours / 12) * 360) + 90;
+      // hourHand.style.transform = `rotate(${hourDegrees}deg)`;
+
+      // это фикс бага, у нас каждые 60 секунд, тоесть когда секундная стрелка показывает на (0deg/360deg) + 90, все стрелки устанавливаются в положение initial value тоесть 90deg, а только после устанавливаются в нужное, соответствующее текущему времени, и т.к. у нас стоит transition 0.05s, этот перескок заметно
+      // когда у нас 59с это 354 + 90(initial) -> 444deg, затем 0с это 0 + 90(initial) -> 90, и так как у нас стоит transition 0.05s, мы видим этот резкий скачок с 444 до 90, также и остальными стрелками
+
+      // решение первое: продолжаем считать дальше не сбрасываясь к initial value
+      const mins = date.getMinutes();
+      const minsDegrees = ((mins / 60) * 360) + ((seconds / 60) * 6) + 90; // ((seconds / 60) * 6)
+      minHand.style.transform = `rotate(${minsDegrees}deg)`;
+
+      const hours = date.getHours();
+      const hourDegrees = ((hours / 12) * 360) + ((mins / 60) * 30) + 90; // ((mins / 60) * 30)
+      hourHand.style.transform = `rotate(${hourDegrees}deg)`;
+
+      // или решение второе: отключаем transition на это время и потом снова включаем, чтобы оно скачок было незаметно
+      // const mins = date.getMinutes();
+      // const minsDegrees = ((mins / 60) * 360) + 90;
+      // minHand.style.transform = `rotate(${minsDegrees}deg)`;
+
+      // const hours = date.getHours();
+      // const hourDegrees = ((hours / 12) * 360) + 90;
+      // hourHand.style.transform = `rotate(${hourDegrees}deg)`;
+
+      // if (secondsDegrees === 90) {
+      //   secondHand.style.transition = "all 0s";
+      // } else {
+      //   secondHand.style.transition = "all 0.05s";
+      // }
+
+      // if (minsDegrees === 90) {
+      //   minHand.style.transition = "all 0s";
+      // } else {
+      //   minHand.style.transition = "all 0.1s";
+      // }
+    }
+
+    setInterval(setClock, 1000); // интервал начнёт работать через секунду после запуска программы
+    setClock(); // поэтому дополнительно запускаем функцию сразу, тоесть первый вызов сразу и потом через 1c setInterval продолжит
   </script>
 </body>
 
