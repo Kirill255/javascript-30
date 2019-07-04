@@ -58,7 +58,37 @@
   <audio data-key="76" src="sounds/tink.wav"></audio>
 
   <script>
+    const handler = (e) => {
+      // console.log(e.keyCode);
+      // console.log(e.key);
+      const audio = document.querySelector(`audio[data-key="${e.keyCode}"]`); // выбираем audio элемент с data-key равным нажатой кнопке, если такой есть
+      const key = document.querySelector(`.key[data-key="${e.keyCode}"]`);
+      // console.log(audio);
+      // console.log(key);
+      if (!audio) return;
 
+      audio.currentTime = 0; // начинать audio с начала, тоесть если мы нажимаем кнопку повторно, то audio начинает проигрываться сначала, даже если оно уже играет, просто попробуй с/без настройки
+      audio.play();
+      key.classList.add("playing"); // добавляем анимацию на элемент
+    }
+
+    const removeTransition = (e) => {
+      // console.log(e); // см. какие transition'ы завершаются
+      if (e.propertyName !== "transform") return; // на элементе работают несколько transition'ов: transform, border-color, box-shadow (см. css), как правило самый долгий transition это transform (цвет, тень это несущественно), поэтому мы будем удалять анимацию только когда завершится transform
+      e.target.classList.remove("playing");
+    }
+
+    // function removeTransition(e) {
+    //   // console.log(e);
+    //   if (e.propertyName !== "transform") return;
+    //   this.classList.remove("playing"); // с es5 ф-цией мы можешм ссылаться на this или e.target, c es6 только e.target, т.к. там this = window, а не элементу
+    // }
+
+    // теперь нужно убрать анимацию с элементов, анимация длится 0.07s (см. css), и мы могли бы поставить таймер setTimeout(() => { key.classList.remove("playing");}, 0.07);, но это может привести к рассинхронизации, поэтому мы подпишемся на такой событие как "transitionend" у элемента https://developer.mozilla.org/ru/docs/Web/Events/transitionend
+    const keys = document.querySelectorAll(".key");
+    keys.forEach(key => key.addEventListener("transitionend", removeTransition));
+
+    window.addEventListener("keydown", handler);
   </script>
 </body>
 
