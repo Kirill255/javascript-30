@@ -6,6 +6,22 @@
   <title>Scoped CSS Variables and JS</title>
 
   <style>
+    :root {
+      --base: #ffc600;
+      --spacing: 10px;
+      --blur: 10px;
+    }
+
+    img {
+      padding: var(--spacing);
+      background: var(--base);
+      filter: blur(var(--blur));
+    }
+
+    .hl {
+      color: var(--base);
+    }
+
     /* misc styles, nothing to do with CSS variables */
     body {
       text-align: center;
@@ -43,7 +59,20 @@
   <img src="https://source.unsplash.com/7bwQXzbF6KE/800x500">
 
   <script>
+    // p.s.: картинка долго загружается, иногда даже не грузится совсем
 
+    const inputs = document.querySelectorAll(".controls input");
+
+    function handleUpdate(e) {
+      // this === e.target
+      // console.log(this.value);
+      // console.log(this.dataset.sizing); // у инпутов spacing и blur есть этот дата-атрибут, а у base нет
+      const suffix = this.dataset.sizing || "";
+      document.documentElement.style.setProperty(`--${this.name}`, this.value + suffix); // `--${spacing}, "20 + "px"` или так `--${base}, "#55aa5b" + ""`
+    }
+
+    inputs.forEach(input => input.addEventListener("change", handleUpdate)); // при изменении
+    inputs.forEach(input => input.addEventListener("mousemove", handleUpdate)); // так сказать в реальном времени, во время движения мыши с зажатым ползунком
   </script>
 </body>
 
