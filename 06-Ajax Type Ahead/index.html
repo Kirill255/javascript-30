@@ -9,7 +9,7 @@
 
 <body>
   <form class="search-form">
-    <input type="text" class="search" placeholder="City or State">
+    <input type="text" class="search" placeholder="City or State" autofocus>
     <ul class="suggestions">
       <li>Filter for a city</li>
       <li>or a state</li>
@@ -17,8 +17,55 @@
   </form>
 
   <script>
-    const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+    const searchInput = document.querySelector(".search");
+    const suggestions = document.querySelector(".suggestions");
 
+    const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+    let cities = [];
+
+    fetch(endpoint)
+      .then(res => res.json())
+      .then(data => {
+        // console.log(data); // массив
+        cities = data; // cities.push(...data); можем просто тупо переприсвоить или запушить распакованный массив
+      })
+      .catch(console.log);
+
+    const findMatches = (wordToMatch, cities) => {
+      return cities.filter(place => {
+        // используем функцию конструктор, а не литерал регулярного выражения /wordToMatch/, т.к. wordToMatch это переменная которая будет изменяться
+        const pattern = new RegExp(wordToMatch, "gi");
+        return place.city.match(pattern) || place.state.match(pattern); // ищем совпадения в городе или штате
+      })
+    };
+
+    const numberWithCommas = (x) => x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); // приходит число 645966, возвращаем 645,966 или приходит 66333 -> 66,333
+
+    // handler for addEventListener
+    function displayMatches(e) {
+      // console.log(this.value); // e.target.value -> значение инпута
+      const matchArray = findMatches(this.value, cities);
+      // console.log(matchArray);
+      const html = matchArray.map(place => {
+        const pattern = new RegExp(this.value, "gi");
+        const cityName = place.city.replace(pattern, `<span class="hl">${this.value}</span>`); // подсвечиваем совпадающию часть, оборачивая в стилизованный span, тоесть
+        const stateName = place.state.replace(pattern, `<span class="hl">${this.value}</span>`); // если мы ищем слово "bos", то в слове "Boston" это будет <span class="hl">Bos</span>ton
+
+        return `
+          <li>
+            <span class="name">${cityName}, ${stateName}</span>
+            <span class="population">${numberWithCommas(place.population)}</span>
+          </li>
+        `;
+      }).join(""); // map возвращает массив, а нам нужна строка, поэтому мы join'им вот таким образом
+
+      suggestions.innerHTML = html; // вставляем разметку в dom
+    }
+
+    searchInput.addEventListener("change", displayMatches);
+    searchInput.addEventListener("keyup", displayMatches);
+
+    // input autofocus https://stackoverflow.com/questions/3383429/setting-focus-on-an-html-input-box-on-page-load
   </script>
 </body>
 
