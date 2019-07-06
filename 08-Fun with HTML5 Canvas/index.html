@@ -17,7 +17,69 @@
   <canvas id="draw" width="800" height="800"></canvas>
 
   <script>
+    // https://developer.mozilla.org/ru/docs/Web/API/Canvas_API
+    // https://developer.mozilla.org/ru/docs/Web/API/Canvas_API/Tutorial
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseup_event
+    const canvas = document.querySelector("#draw");
+    const ctx = canvas.getContext("2d");
 
+    canvas.width = window.innerWidth; // по default width="800" и height="800",
+    canvas.height = window.innerHeight; // но мы хотим растянуть холст во всё окно
+
+    ctx.strokeStyle = "#BADA55"; // цвет очертаний
+    ctx.lineJoin = "round"; // внешний вид "углов", где встречаются линии
+    ctx.lineCap = "round"; // внешний вид концов линий
+    ctx.lineWidth = 100; // ширина линий
+    // ctx.globalCompositeOperation = "multiply"; // режим наложения/смешивания цвета https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
+
+    let isDrawing = false; // будем рисовать только если кнопка мыши нажата
+    let lastX = 0;
+    let lastY = 0;
+    let hue = 0; // hsl http://mothereffinghsl.com/ и https://www.rapidtables.com/web/color/color-wheel.html
+    let direction = true;
+
+    function draw(e) {
+      if (!isDrawing) return; // если кнопка мыши не нажата, то не! рисуем
+      // console.log(e);
+      ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`; // цвет
+      ctx.beginPath(); // начать рисовать
+      ctx.moveTo(lastX, lastY); // начать с координат
+      ctx.lineTo(e.offsetX, e.offsetY); // и рисовать линию до тех координат где сейчас находится мышь
+      ctx.stroke(); // рисовать с внешней обводкой
+
+      // lastX = e.offsetX;
+      // lastY = e.offsetY;
+      [lastX, lastY] = [e.offsetX, e.offsetY]; // обновляем координаты
+
+      hue++; // увеличиваем hue
+      // мы не можем увеличивать hue бесконечно, точнее это бессмысленно, в hsl схеме значения hue идут от 0 до 360
+      if (hue >= 360) {
+        hue = 0;
+      }
+
+      // изменяем ширину линии от 100 до 1 и обратно от 1 до 100
+      if (ctx.lineWidth >= 100 || ctx.lineWidth <= 1) {
+        direction = !direction;
+      }
+
+      if (direction) {
+        ctx.lineWidth++;
+      } else {
+        ctx.lineWidth--;
+      }
+    }
+
+    // кнопка мыши нажата
+    canvas.addEventListener("mousedown", (e) => {
+      isDrawing = true;
+      [lastX, lastY] = [e.offsetX, e.offsetY]; // устанавливаем текущие координаты мыши
+    });
+    // рисуем, но с учётом того что кнопка мыши нажата
+    canvas.addEventListener("mousemove", draw);
+    // кнопка мыши отпущена
+    canvas.addEventListener("mouseup", () => isDrawing = false);
+    // мышка вышла за пределы холста, т.к. у нас холст сейчас во всё окно, то фактически, если мышка вышла за пределы окна
+    canvas.addEventListener("mouseout", () => isDrawing = false);
   </script>
 </body>
 
