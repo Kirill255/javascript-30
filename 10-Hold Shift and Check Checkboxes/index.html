@@ -96,8 +96,47 @@
   </div>
 
   <script>
+    const checkboxes = document.querySelectorAll(".inbox input[type='checkbox']");
 
+    let lastChecked;
+
+    function handler(e) {
+      // console.log(e);
+      // console.dir(this);
+
+      let inBetween = false;
+      // если Shift нажат и мы нажимаем на checkbox чтобы поставить галочку(а не снять!)
+      if (e.shiftKey && this.checked) {
+        checkboxes.forEach(checkbox => {
+          console.log(checkbox);
+          if (checkbox === this || checkbox === lastChecked) {
+            inBetween = !inBetween;
+            console.log("Starting to check them in between!");
+          }
+          if (inBetween) {
+            checkbox.checked = true;
+          }
+        });
+      }
+
+      lastChecked = this; // сохраняем ссылку на последний нажатый(отмеченный)
+    }
+
+    checkboxes.forEach(checkbox => checkbox.addEventListener("click", handler)); // почему не "change"? -> т.к. нам нужно отслеживать нажата ли клавиша Shift, в событии click есть свойство shiftKey
   </script>
 </body>
 
 </html>
+
+<!--
+// if (e.shiftKey && this.checked), тогда проверяем все checkboxes
+            checkbox -> checkbox === this: нет
+            checkbox -> checkbox === this: нет
+      click checkbox -> checkbox === this: да, тогда inBetween = !inBetween(было false, стало true), дальше if (inBetween) checkbox.checked = true
+            checkbox -> checkbox === this: нет, но сейчас inBetween = true, поэтому if (inBetween) checkbox.checked = true
+            checkbox -> checkbox === this: нет, но сейчас inBetween = true, поэтому if (inBetween) checkbox.checked = true
+            checkbox -> checkbox === this: нет, но сейчас inBetween = true, поэтому if (inBetween) checkbox.checked = true
+lastChecked checkbox -> checkbox === this: нет, но checkbox === lastChecked: да, тогда inBetween = !inBetween(было true, стало false), сам checkbox остаётся отмеченным ещё с прошлого раза
+            checkbox -> checkbox === this: нет
+            checkbox -> checkbox === this: нет
+-->
