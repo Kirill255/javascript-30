@@ -214,6 +214,29 @@
         if (callNow) func.apply(context, args);
       };
     }
+
+    const sliderImages = document.querySelectorAll(".slide-in");
+
+    function checkSlide(e) {
+      console.count(e);
+      sliderImages.forEach(sliderImage => {
+        // находим середину(половину) изображения по Y, тоесть когда мы скролим страницу, мы хотим начать анимацию когда видна половина картинки
+        const slideInAt = (window.scrollY + window.innerHeight) - sliderImage.height / 2; // сколько проскролили от верха окна + высота viewport'а - половина высоты картинки
+        // находим низ картинки, потому что хотим убирать картинку обратно, если мы проскролили ниже, т.к. мы хотели бы видеть туже анимацию если мы скролим обратно наверх
+        const imageBottom = sliderImage.offsetTop + sliderImage.height; // верх картинки от верха окна + высота картинки
+
+        const isHalfShown = slideInAt > sliderImage.offsetTop;
+        const isNotScrolledPast = window.scrollY < imageBottom;
+        if (isHalfShown && isNotScrolledPast) {
+          sliderImage.classList.add("active");
+        } else {
+          sliderImage.classList.remove("active");
+        }
+      });
+    }
+
+    window.addEventListener("scroll", debounce(checkSlide));
+    // window.addEventListener("scroll", debounce(checkSlide, 100)); // debounce по default'у каждые 20мс, можем изменить default значение
   </script>
 </body>
 
