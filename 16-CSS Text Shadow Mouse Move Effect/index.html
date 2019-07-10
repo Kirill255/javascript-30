@@ -37,7 +37,52 @@
   </div>
 
   <script>
+    const hero = document.querySelector(".hero");
+    const text = hero.querySelector("h1");
+    const walk = 100; // 100px - насколько далеко тень будет отходить от блока, вернее весь шаг, можно сказать диаметр от центра, тоесть если мышка на самом элементе то тень не отходит, если мышка сверху то тень начинает отходить от блока чем дальше, тем на большее кол-во px, но максимум на 50, тоже самое вниз, влево, вправо, попробуй сделать 500 или например 20
 
+    // всего 100px шаг
+
+    //      -50/-50      ^ -50px       50/-50
+    //                   |
+    //                   |
+    //       <- - - -x.y . 0px- - - ->
+    //                   |
+    //                   |
+    //     -50/50        V 50px       50/50
+
+    function shadow(e) {
+      // console.log(e);
+      const { offsetWidth: width, offsetHeight: height } = hero; // размеры hero
+      let { offsetX: x, offsetY: y } = e; // координаты мыши
+      // console.log(x, y);
+      // console.log(this, e.target); // e.target - то что на самом деле вызвало событие, this - это кто слушает событие (e.currentTarget), т.к. у нас висит обработчик на hero, поэтому this - это hero, если мы наводим на hero, то this и e.target - одинаковы, но у hero есть дочерний элемент h1, и когда мы наводим на h1, то this - это по прежнему hero, а вот e.target - это h1
+
+      // e.offsetX и e.offsetY - это координаты мыши, но если внутри есть вложенные элементы, то нам нужно немного математики =)
+      // console.log(e.target.offsetLeft);
+      if (this !== e.target) {
+        x = x + e.target.offsetLeft; // x - это мышка, e.target.offsetLeft - смещение текущего элемента относительно родительского, тоесть
+        y = y + e.target.offsetTop; // когда мы наводим на дочерний h1 мы прибавляем его смещение относительно hero
+      }
+
+
+      const xWalk = Math.round((x / width * walk) - (walk / 2));
+      const yWalk = Math.round((y / height * walk) - (walk / 2));
+      // console.log(xWalk, yWalk);
+
+      // тень задаётся примерно так: 10px 10px 0 red
+      // text.style.textShadow = `${xWalk}px ${yWalk}px 0 red`; // простой пример с одной тенью
+
+      // с несколькими тенями
+      text.style.textShadow = `
+        ${xWalk}px ${yWalk}px 0 rgba(255,0,255,0.7),
+        ${xWalk * -1}px ${yWalk}px 0 rgba(0,255,255,0.7),
+        ${yWalk}px ${xWalk * -1}px 0 rgba(0,255,0,0.7),
+        ${yWalk * -1}px ${xWalk}px 0 rgba(0,0,255,0.7)
+      `;
+    }
+
+    hero.addEventListener("mousemove", shadow);
   </script>
 </body>
 
