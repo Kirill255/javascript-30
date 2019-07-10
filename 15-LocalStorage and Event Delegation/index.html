@@ -37,16 +37,85 @@
       <li>Loading Tapas...</li>
     </ul>
     <form class="add-items">
-      <input type="text" name="item" placeholder="Item Name" required>
+      <!-- Лучше не задавать name="item", любое другое, хоть asdfg, но не item -->
+      <!-- <input type="text" name="item" placeholder="Item Name" required> -->
+
+      <input type="text" name="text" placeholder="Item Name" required>
       <input type="submit" value="+ Add Item">
     </form>
   </div>
 
   <script>
-    const addItems = document.querySelector('.add-items');
+    const addItems = document.querySelector('.add-items'); // form
     const itemsList = document.querySelector('.plates');
-    const items = [];
+    const items = JSON.parse(localStorage.getItem("items")) || [];
+
+    // handleSubmit
+    function addItem(e) {
+      e.preventDefault();
+
+      // const text = this.elements.text.value; // значение input[name="text"]
+      const text = this.text.value; // сокращённая запись, this - форма, text - инпут с [name="text"], value - значение инпута
+
+      const item = {
+        text,
+        done: false
+      };
+      // console.log(item);
+      items.push(item); // добавляем новый item
+      populateList(items, itemsList); // отображаем
+      localStorage.setItem("items", JSON.stringify(items)); // сохраняем в localStorage
+      this.reset(); // form reset
+    }
+
+    function populateList(plates = [], platesList) {
+      platesList.innerHTML = plates.map((plate, i) => {
+        return `
+          <li>
+            <input type="checkbox" data-index=${i} id="item${i}" ${plate.done ? "checked" : ""} />
+            <label for="item${i}">${plate.text}</label>
+            <button data-index=${i}>-</button>
+          </li>
+        `;
+      }).join("");
+    }
+
+    function toggleDone(e) {
+      // console.log(e.target); // генерируется несколько событий, т.к. у нас есть вложенные элементы li, input(checkbox), label, и на каждом из них сработает событие click (зависит от того места куда мы кликнули), но нам нужен только checkbox
+      if (!e.target.matches("input")) return; // пропускаем если это не input
+
+      const index = e.target.dataset.index;
+      items[index].done = !items[index].done;
+      localStorage.setItem("items", JSON.stringify(items));
+      populateList(items, itemsList);
+    }
+
+    function deleteItem(e) {
+      // console.log(e.target);
+      if (!e.target.matches("button")) return; // пропускаем если это не button
+      const index = e.target.dataset.index;
+      items.splice(index, 1);
+      localStorage.setItem("items", JSON.stringify(items));
+      populateList(items, itemsList);
+    }
+
+    // form
+    addItems.addEventListener("submit", addItem);
+    // делегирование событий, т.к. мы создаём элементы динамически, мы должны повесить обработчик на их родителя, который уже существует в момент загрузки страницы
+    itemsList.addEventListener("click", toggleDone);
+    itemsList.addEventListener("click", deleteItem);
+    // при первой загрузке страницы мы сразу вызываем функцию, чтобы если в localStorage есть сохранённые элементы, мы сразу их отобразили
+    populateList(items, itemsList);
+
   </script>
 </body>
 
 </html>
+
+<!--
+// https://learn.javascript.ru/form-elements
+// const item = this.elements.item.value; // почему-то не работает!
+// const item = this.elements.item("item").value; // работает вот так
+// const text = this.item.value; // сокращённая запись работает как ожидается, this - форма, item - инпут с [name="item"], value - значение инпута
+// upd.: Лучше не задавать name="item", любое другое, хоть asdfg, но не item
+-->

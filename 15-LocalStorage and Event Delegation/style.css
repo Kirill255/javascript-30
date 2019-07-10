@@ -66,8 +66,9 @@ h2 {
   margin-right: 10px;
 }
 
+/* https://emojikeyboard.top/  https://unicode-table.com/ru/1F41F/ */
 .plates input:checked + label:before {
-  content: "🌮";
+  content: "🐟";
 }
 
 .add-items {
