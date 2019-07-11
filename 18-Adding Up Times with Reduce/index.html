@@ -7,6 +7,7 @@
 </head>
 
 <body>
+  <h1 class="total">_:_:_</h1>
   <ul class="videos">
     <li data-time="5:43">
       Video 1
@@ -185,7 +186,43 @@
   </ul>
 
   <script>
+    // const timeNodes = document.querySelectorAll("[data-time]"); // timeNodes всевдомассив(NodeList) у которого нет метода map
+    // const seconds = [...timeNodes].map(node => node.dataset.time);
+    // console.log(seconds);
+    // или например так
+    // const timeNodes = Array.from(document.querySelectorAll("[data-time]"));
+    // const seconds = timeNodes.map(node => node.dataset.time);
+    // console.log(seconds);
 
+    // const timeNodes = Array.from(document.querySelectorAll("[data-time]"));
+    // const seconds = timeNodes.map(node => node.dataset.time).map(timeCode => {
+    //   const [mins, secs] = timeCode.split(":").map(parseFloat); // также нужно привести строки к числу
+    //   // console.log(mins, secs);
+    //   return (mins * 60) + secs; // конвертируем в секунды 4:04 -> 24004
+    // });
+    // console.log(seconds);
+
+    const timeNodes = Array.from(document.querySelectorAll("[data-time]"));
+    const totalTime = document.querySelector(".total");
+
+    const seconds = timeNodes
+      .map(node => node.dataset.time)
+      .map(timeCode => {
+        const [mins, secs] = timeCode.split(":").map(parseFloat);
+        return (mins * 60) + secs;
+      })
+      .reduce((total, vidSeconds) => total + vidSeconds, 0);
+    console.log(seconds);
+
+    let secondsLeft = seconds; // 17938
+    const hours = Math.floor(secondsLeft / 3600); // получили часы 4
+    secondsLeft = secondsLeft % 3600; // остаток секунд 3538
+
+    const mins = Math.floor(secondsLeft / 60); // получили минуты 58
+    secondsLeft = secondsLeft % 60; // остаток секунд 58
+
+    console.log(`${hours}:${mins}:${secondsLeft}`); // 4:58:58
+    totalTime.innerHTML = `${hours}:${mins}:${secondsLeft}`;
   </script>
 </body>
 
