@@ -80,6 +80,19 @@
   </h1>
 
   <script>
+    const arrow = document.querySelector(".arrow");
+    const speed = document.querySelector(".speed-value");
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API
+    // p.s.: speed и heading(направление) работают только если устройство в движении
+    navigator.geolocation.watchPosition((data) => {
+      console.log(data);
+      speed.textContent = data.coords.speed || 0;
+      let heading = data.coords.heading || 0;
+      arrow.style.transform = `rotate(${heading}deg)`;
+    }, (err) => {
+      console.log(err);
+    });
 
   </script>
 </body>
