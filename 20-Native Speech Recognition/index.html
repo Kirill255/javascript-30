@@ -51,9 +51,87 @@
   <div class="words" contenteditable></div>
 
   <script>
+    // https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition
+    // // SpeechRecognition это глобальный объект, т.к. поддержка в браузерах ещё слабая, нам нужна эта строка, называется по разному в Firefox/Chrome
     window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
+    const recognition = new SpeechRecognition();
+    recognition.interimResults = true; // распознавать промежуточный вариант, то есть в процессе говорения выдаётся какой-то вариант, если false -> нужно сначала полностью перестать говорить, тогда начнётся распознавание
+    // recognition.lang = "en-US"; // по умолчанию язык берётся из системы, тоесть у меня был бы русский, поэтому вся речь бы обрабатывалась бы на русском, нужно было бы говорить по-русски и в коде обрабатывать русскую речь cat->кот
+
+    let p = document.createElement("p");
+    const words = document.querySelector(".words");
+    words.appendChild(p);
+
+    // https://developer.mozilla.org/ru/docs/Web/API/SpeechRecognition/onresult
+    recognition.addEventListener("result", (e) => {
+      // console.log(e);
+      // это объект, не массив
+      // console.log(e.results);
+      // console.log(e.results[0][0].transcript);
+
+      const transcript = Array.from(e.results)
+        .map(result => result[0])
+        .map(result => result.transcript)
+        .join("");
+
+      console.log(transcript); // наша речь
+
+      // p.textContent = transcript; // вставить как есть
+
+      // или можем её как-то обработать перед вставкой в html
+      // cat-кот/en-ru
+      if (transcript.includes("кот")) {
+        console.log("🐈🐈🐈🐈🐈🐈🐈🐈🐈🐈");
+      }
+
+      // siri get the weather
+      if (transcript.includes("какая погода")) {
+        // тут отправляем запрос на API получаем погоду и выводим пользователю
+        console.log("The weather is sunny today");
+      }
+
+      // заменить ругательства на смайлик
+      // const poopScript = transcript.replace(/poop|poo|shit|dump/gi, "💩");
+      const poopScript = transcript.replace(/дурак|дерьмо|говно/gi, "💩");
+
+      p.textContent = poopScript; // вставить текст/речь в p
+
+      // если мы закончили говорить, то создать новый p, тоесть у нас есть p, когда мы что-то говорим, наша речь вставляется в этот текущий p, когда мы закончили говорить, создаётся новый p, и каждый раз когда мы начинаем снова говорить, речь вставляется в новый p
+      if (e.results[0].isFinal) {
+        p = document.createElement("p");
+        words.appendChild(p);
+      }
+
+    });
+
+    // нужно снова перезапустить recognition после того как мы закончили говорить
+    // как работает recognition.start(), мы запускаем recognition.start() и можем что-то сказать, как только мы что-то сказали срабатывает result event, когда закончили говорить, это событие больше не прослушивается, нам нужно снова запустить  recognition.start(), когда? есть второе событие end event
+    recognition.addEventListener("end", recognition.start);
+
+    recognition.start();
   </script>
 </body>
 
 </html>
+
+<!--
+// event.results
+SpeechRecognitionResultList {0: SpeechRecognitionResult, length: 1}
+0: SpeechRecognitionResult
+0: SpeechRecognitionAlternative
+confidence: 0.9405662417411804
+transcript: "Может скажешь что-нибудь"
+__proto__: SpeechRecognitionAlternative
+isFinal: true
+length: 1
+__proto__: SpeechRecognitionResult
+length: 1
+__proto__: SpeechRecognitionResultList
+
+// схема
+у нас есть p
+<p>Когда мы что-то говорим это записывается в этот текущий p</p>
+когда закончили говорить создаётся новый p
+<p>Когда начинаем снова говорить, речь записывается уже в этот новый p</p>
+-->
