@@ -29,6 +29,10 @@
   </div>
 
   <script>
+    // https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis -> интерфейса для службы речи
+    // https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance -> объект с настройками что и как нужно говорить
+    // по итогу мы создадим объект с настройками, настроим их, и потом передадим этот объект в SpeechSynthesis для озвучивания
+    const synth = window.speechSynthesis;
     const msg = new SpeechSynthesisUtterance();
     let voices = [];
     const voicesDropdown = document.querySelector('[name="voice"]');
@@ -36,7 +40,56 @@
     const speakButton = document.querySelector('#speak');
     const stopButton = document.querySelector('#stop');
 
+    // устанавливает текст, который будет синтезироваться
+    msg.text = document.querySelector("[name='text']").value;
+
+    function populateVoices(e) {
+      voices = this.getVoices(); // synth.getVoices(); // получаем список голосов
+      console.log(voices);
+      // заполняем наш voicesDropdown
+      voicesDropdown.innerHTML = voices
+        .filter(voice => voice.lang.includes("en")) // если нужно можем оставить все голоса, мы же оставляем только en
+        .map(voice => `<option value="${voice.name}">${voice.name} (${voice.lang})</option>`)
+        .join("");
+    }
+
+    function setVoice(e) {
+      // устанавливает голос, который будет использоваться для произнесения речи
+      console.log(this.value);
+      // на нужно установить именно объект голоса https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisVoice, а не просто его название(this.value)
+      // console.log(voices.find(voice => voice.name === this.value));
+      msg.voice = voices.find(voice => voice.name === this.value);
+      toggle(); // воспроизводим речь с новым выбранным голосом
+    }
+
+    function toggle(startOver = true) {
+      speechSynthesis.cancel(); // завершаем речь произносимую в настоящее время
+      // если мы передали флаг false, то эта часть кода не выполнится, это нужно для кнопки stop
+      if (startOver) {
+        speechSynthesis.speak(msg); // и воспроизводим новую
+      }
+    }
+
+    function setOption() {
+      console.log(this.name, this.value); // rate - скорость, pitch - высота голоса(низкий->грубый/высокий->писклявый), text - текст речи
+      msg[this.name] = this.value;
+      toggle(); // воспроизводим речь с новыми настройками
+    }
+
+    // вызывается после загрузки страницы, тоесть страница загружается, выполняется какой-то js, и асинхронно определяется список голосов доступных в вашей OS, вот когда этот список определится, тогда вызовется это событие, которое грубо говоря говорит что всё готово к работе, сам список можно получить методом speechSynthesis.getVoices(), но после того как он готов, вот для этого нам и нужно это событие
+    synth.addEventListener("voiceschanged", populateVoices);
+    voicesDropdown.addEventListener("change", setVoice); // при выборе другого голоса, устанавливаем его в объект с настройками
+    options.forEach(option => option.addEventListener("change", setOption)); // регулируем настройки инпутами
+    speakButton.addEventListener("click", toggle);
+    stopButton.addEventListener("click", () => toggle(false));
   </script>
 </body>
 
 </html>
+
+<!--
+Из доки "Некоторые механизмы синтеза речи могут дополнительно ограничивать минимальную и максимальную скорости"
+в общем одни голоса могут воспроизводится например максимум на x3 скорости, то другие могут воспроизводится только максимум на x2
+
+ps.: ещё вроде бы есть какие-то баги при переключении голоса, скорее всего нужно задавать голос по-умолчанию вл время populateVoices()
+-->
