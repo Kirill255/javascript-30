@@ -32,7 +32,29 @@
   </div>
 
   <script>
-    // 👀👀👀👀👀👀👀👀👀👀👀👀👀👀👀
+    const triggers = document.querySelectorAll("a");
+    const highlight = document.createElement("span"); // создаём span
+    highlight.classList.add("highlight");
+    document.body.appendChild(highlight);
+
+    function highlightLink(e) {
+      // console.log(this); // ссылка
+      const linkCoords = this.getBoundingClientRect();
+      console.log(linkCoords);
+      const coords = {
+        width: linkCoords.width,
+        height: linkCoords.height,
+        left: linkCoords.left + window.scrollX, // нужно учесть смещение при скролле
+        top: linkCoords.top + window.scrollY
+      };
+
+      highlight.style.width = `${coords.width}px`;
+      highlight.style.height = `${coords.height}px`;
+      highlight.style.transform = `translate(${coords.left}px, ${coords.top}px)`;
+    }
+
+    // когда курсор заходит на элемент(ссылку)
+    triggers.forEach(a => a.addEventListener("mouseenter", highlightLink));
   </script>
 </body>
 
