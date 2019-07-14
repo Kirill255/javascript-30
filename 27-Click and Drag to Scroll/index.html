@@ -37,6 +37,40 @@
   </div>
 
   <script>
+    const slider = document.querySelector(".items");
+    let isDown = false; // нажата ли сейчас кнопка мыши
+    let startX;
+    let scrollLeft;
+
+    // при нажатии на кнопку мыши
+    slider.addEventListener("mousedown", (e) => {
+      isDown = true;
+      slider.classList.add("active");
+      startX = e.pageX - slider.offsetLeft; // конкретное место в которое мы кликнули по оси X и минус смещение самого слайдера относительно окна, тоесть где именно сейчас нажата мышь(начальная точка от которой мы будем сдвигать слайдер) p.s.: нам не важно где именно это по оси Y
+      scrollLeft = slider.scrollLeft; // где был первоначальный скролл когда мы нажали кнопку мыши, тоесть скролл мог быть уже немного проскроллен
+    });
+
+    // если мышка вышла за пределы элемента
+    slider.addEventListener("mouseleave", (e) => {
+      isDown = false;
+      slider.classList.remove("active");
+    });
+
+    // при отпускании кнопки мыши
+    slider.addEventListener("mouseup", (e) => {
+      isDown = false;
+      slider.classList.remove("active");
+    });
+
+    // при движении мыши
+    slider.addEventListener("mousemove", (e) => {
+      if (!isDown) return;  // если кнопка мыши не нажата, нет смысла выполнять ф-цию дальше
+      e.preventDefault(); // в данном случае отменяет любые выделения, например текста, стандартное поведение когда нам нужно выделить текст, мы зажимаем кнопку мыши и двигаем её
+      const x = e.pageX - slider.offsetLeft; // мы уже знаем где был курсор, когда мы нажали на кнопку мыши(startX), теперь нам нужно узнать где курсор мыши находится сейчас, тоесть после того как мы его двигали
+      // console.log(startX, x);
+      const walk = (x - startX) * 3; // x - startX умножили на 3, чтобы слайдер двигался быстрее, тоесть каждый пиксель считался за 3
+      slider.scrollLeft = scrollLeft - walk;
+    });
 
   </script>
 </body>
