@@ -47,8 +47,46 @@
   <button type="button">Click</button>
 
   <script>
+    // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
+    const divs = document.querySelectorAll("div");
+    const button = document.querySelector("button");
 
+    function logText(e) {
+      // console.log(this); // сам элемент
+      console.log(this.classList.value);
+      // e.stopPropagation(); // stop bubbling
+    }
+
+    divs.forEach(div => div.addEventListener("click", logText)); // если мы кликнем по самому внутреннему div.three, то т.к. событие всплывает, у нас отобразятся все три div'а
+    // document.body.addEventListener("click", logText); // обработчик сработает даже если мы кликнем по самому внутреннему div.three, событие всплывает на самый верх документа
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#Safely_detecting_option_support
+    // divs.forEach(div => div.addEventListener("click", logText, true)); // вызывает обработчики на стадии capturing https://learn.javascript.ru/event-bubbling, по default обработчики вызываются на стадии bubbling
+    // divs.forEach(div => div.addEventListener("click", logText, { capture: true })); // или так, default false, или просто без третьего аргумента
+
+    // divs.forEach(div => div.addEventListener("click", logText, { once: true })); // выполняет обработчики только один раз
+
+
+    button.addEventListener("click", (e) => {
+      e.stopPropagation();
+      console.log("Click");
+    })
+    document.body.addEventListener("click", logText); // обработчик не сработает если мы будет кликать по кнопке, т.к. у кнопки стоит stopPropagation()
   </script>
 </body>
 
 </html>
+
+<!--
+Алгоритм:
+При наступлении события – элемент, на котором оно произошло, помечается как «целевой» (event.target)
+Далее событие сначала двигается вниз от корня документа к event.target, по пути вызывая обработчики, поставленные через addEventListener(...., true)
+Далее событие двигается от event.target вверх к корню документа, по пути вызывая обработчики, поставленные через on* и addEventListener(...., false)
+
+Обычно событие будет всплывать наверх, до элемента <html>, а затем до document, а иногда даже до window, вызывая все обработчики на своем пути,
+но любой промежуточный обработчик может решить, что событие полностью обработано, и остановить всплытие, для остановки всплытия нужно вызвать метод event.stopPropagation()
+
+В более старых версиях спецификации DOM третьим параметром addEventListener было логическое значение, указывающее, следует ли захватывать событие на этапе погружения.
+Со временем стало ясно, что необходимо больше вариантов. Вместо добавления дополнительных параметров в функцию, третий параметр был изменен на объект,
+который может содержать различные свойства, определяющие значения параметров для настройки слушателя событий
+-->
