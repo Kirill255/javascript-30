@@ -168,6 +168,22 @@
   </div>
 
   <script>
+    const nav = document.querySelector("#main");
+    let topOfNav = nav.offsetTop; // задаём вне обработчика, иначе будет заново высчитываться при каждой прокрутке
+
+    function fixNav(e) {
+      console.log(topOfNav, window.scrollY);
+      // если мы прокрутили больше чем верх nav'а
+      if (window.scrollY >= topOfNav) {
+        document.body.style.paddingTop = nav.offsetHeight + "px"; // задаём padding у body под nav, инчае будут резкие скачки/дёрганье, т.к. при "position: fixed" элемент выпадает из потока документа(как при absolute)
+        document.body.classList.add("fixed-nav"); // вешаем класс, дальше работает css (см. css)
+      } else {
+        document.body.classList.remove("fixed-nav");
+        document.body.style.paddingTop = 0;
+      }
+    }
+
+    window.addEventListener("scroll", fixNav);
 
   </script>
 </body>
