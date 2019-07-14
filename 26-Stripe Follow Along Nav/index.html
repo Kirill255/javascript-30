@@ -21,7 +21,7 @@
         <div class="dropdown dropdown1">
           <div class="bio">
             <img src="https://logo.clearbit.com/wesbos.com">
-            <p>Wes Bos sure does love web development. He teaches things like JavaScript, CSS and BBQ. Wait. BBQ isn't
+            <p>Wes Bos sure does love web development. He teaches things like JavaScript, CSS and BBQ. Wait. BBQ isn"t
               part of web development. It should be though!</p>
           </div>
         </div>
@@ -81,6 +81,43 @@
 
   <script>
     // https://stripe.com/ смотреть пример меню сдесь
+
+    const triggers = document.querySelectorAll(".cool > li");
+    const background = document.querySelector(".dropdownBackground");
+    const nav = document.querySelector(".top");
+
+    // при наведении на элемент
+    function handleEnter(e) {
+      // console.log(this); // элемент списка
+      this.classList.add("trigger-enter");
+      setTimeout(() => this.classList.contains("trigger-enter") && this.classList.add("trigger-enter-active"), 150); // этот класс вешаем с небольшой задержкой, от него зависит прозрачность элемента, если мы навесим его сразу же, то не увидим анимацию прозрачности с "opacity: 0" до "opacity: 1", класс trigger-enter отвечает за свойство "display: block", если навесим одновременно trigger-enter и trigger-enter-active, то элемент просто сразу же появится с "display: block; opacity: 1"
+      background.classList.add("open");
+
+      const dropdown = this.querySelector(".dropdown"); // берём контент внутри элемента, тоесть внутри каждого li есть div.dropdown
+      const dropdownCoords = dropdown.getBoundingClientRect(); // берём инфу о этом div.dropdown
+      const navCoords = nav.getBoundingClientRect(); // берём инфу о nav, это наш корневой элемент
+
+      const coords = {
+        width: dropdownCoords.width,
+        height: dropdownCoords.height,
+        left: dropdownCoords.left - navCoords.left,
+        top: dropdownCoords.top - navCoords.top,
+      };
+
+      background.style.setProperty("width", `${coords.width}px`);
+      background.style.setProperty("height", `${coords.height}px`);
+      background.style.setProperty("transform", `translate(${coords.left}px, ${coords.top}px)`);
+    }
+
+    // когда курсор уходит с элемента
+    function handleLeave(e) {
+      this.classList.remove("trigger-enter", "trigger-enter-active");
+      background.classList.remove("open");
+    }
+
+    triggers.forEach(trigger => trigger.addEventListener("mouseenter", handleEnter));
+    triggers.forEach(trigger => trigger.addEventListener("mouseleave", handleLeave));
+
   </script>
 </body>
 

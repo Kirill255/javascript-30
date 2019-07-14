@@ -66,10 +66,12 @@ nav ul {
   display: none;
 }
 
+/* при наведении мыши на элемент */
 .trigger-enter .dropdown {
   display: block;
 }
 
+/* при наведении мыши на элемент */
 .trigger-enter-active .dropdown {
   opacity: 1;
 }
@@ -89,6 +91,7 @@ nav ul {
   opacity: 0;
 }
 
+/* при наведении мыши на элемент */
 .dropdownBackground.open {
   opacity: 1;
 }
