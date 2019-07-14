@@ -18,7 +18,26 @@
   </div>
 
   <script>
+    const speed = document.querySelector(".speed");
+    const bar = speed.querySelector(".speed-bar");
+    const video = document.querySelector(".flex");
 
+    function handleMove(e) {
+      const y = e.pageY - this.offsetTop; // текущее положение мышки по оси Y минус смещение от верха окна
+      const percent = y / this.offsetHeight; // переводим это значение в %, тоесть y -> это значение от 0 до 410, тогда например y=205 -> это 50%, на данный момент percent -> это значение от 0 до 1, конкретно в % мы переведём ниже, для этого нужно ещё умножить на 100
+      // console.log(y, percent);
+      const min = 0.4; // минимальная скорость воспроизведения не может быть равна 0, минимум у нас будет 0.4 -> это 0%
+      const max = 4; // 100%
+      const height = Math.round(percent * 100) + "%"; // округляем, и для стилей нам нужна именно строка с ед. измерения, тоесть не просто число 50, а именно 50%
+      // console.log(height);
+      const playbackRate = percent * (max - min) + min;
+      // console.log(playbackRate);
+      bar.style.height = height;
+      bar.textContent = playbackRate.toFixed(2) + "×";
+      video.playbackRate = playbackRate;
+    }
+
+    speed.addEventListener("mousemove", handleMove);
   </script>
 </body>
 
