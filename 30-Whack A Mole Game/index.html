@@ -37,6 +37,59 @@
     const holes = document.querySelectorAll('.hole');
     const scoreBoard = document.querySelector('.score');
     const moles = document.querySelectorAll('.mole');
+    let lastHole;
+    let timeUp = false;
+    let score = 0;
+
+    // возвращает рандомной время, кол-во мс на которое кроты будут выглядывать из нор, тоесть кто-то будет быстрее прятаться, кто-то медленнее
+    function randomTime(min, max) {
+      return Math.round(Math.random() * (max - min) + min);
+    }
+
+    // возвращает рандомную нору, всего их у нас 6, holes -> это NodeList
+    function randomHole(holes) {
+      const idx = Math.floor(Math.random() * holes.length);
+      const hole = holes[idx]; // конкретный дом элемент
+      // console.log(hole);
+      // если нора совпадает с текущей норой, нужно перезапустить рандомайзер
+      if (hole === lastHole) {
+        console.log("Ah nah thats the same one bud");
+        return randomHole(holes);
+      }
+      // иначе переназначить последнюю нору
+      lastHole = hole;
+      return hole;
+    }
+
+    // кроты выглядывают из нор
+    function peep() {
+      const time = randomTime(200, 1000);
+      const hole = randomHole(holes);
+      hole.classList.add("up"); // показываем крота из рандомной норы
+      setTimeout(() => {
+        hole.classList.remove("up"); // прячем крота
+        if (!timeUp) peep(); // если время игры не вышло, запускаем ф-цию снова
+      }, time);
+    }
+
+    // запуск игры, обнуляем счётчик, флаг, запускаем кротов
+    function startGame() {
+      scoreBoard.textContent = 0;
+      timeUp = false;
+      score = 0;
+      peep(); // запустить кротов
+      setTimeout(() => timeUp = true, 10000); // длительность игры 10с, через 10с изменить timeUp флаг, и в зависимости от него запускать peep() ф-цию снова или нет
+    }
+
+    // ударить(кликнуть) крота
+    function bonk(e) {
+      if (!e.isTrusted) return; // читер! https://developer.mozilla.org/en-US/docs/Web/API/Event/isTrusted
+      score++; // увеличиваем счётчик
+      this.parentNode.classList.remove("up"); // прячем крота, тоесть мы должны убрать класс up, у hole, а не у mole
+      scoreBoard.textContent = score;
+    }
+
+    moles.forEach(mole => mole.addEventListener("click", bonk));
 
   </script>
 </body>
